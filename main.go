@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"math/rand"
@@ -29,10 +30,14 @@ const (
 			frag_color = vec4(1, 1, 1, 1);
 		}
 	` + "\x00"
-	rows      = 100
-	columns   = 100
-	threshold = 0.15
-	fps       = 15
+)
+
+var (
+	rows      = 20
+	columns   = 20
+	seed      = time.Now().UnixNano()
+	threshold = 0.2
+	fps       = 20
 )
 
 var (
@@ -55,6 +60,15 @@ type cell struct {
 
 	x int
 	y int
+}
+
+func init() {
+	flag.IntVar(&columns, "columns", columns, "Sets the number of columns.")
+	flag.IntVar(&rows, "rows", rows, "Sets the number of columns.")
+	flag.Int64Var(&seed, "seed", seed, "Sets the starting seed of the game, used to randomize the initial state.")
+	flag.Float64Var(&threshold, "threshold", threshold, "A percentage between 0 and 1 used in conjunction with the -seed to determine if a cell starts alive. For example, 0.15 means each cell has a 15% chance of starting alive.")
+	flag.IntVar(&fps, "fps", fps, "Sets the frames-per-second, used set the speed of the simulation.")
+	flag.Parse()
 }
 
 func main() {
@@ -178,7 +192,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 }
 
 func makeCells() [][]*cell {
-	rand.New(rand.NewSource(time.Now().UnixNano()))
+	rand.New(rand.NewSource(seed))
 
 	cells := make([][]*cell, rows)
 	for x := 0; x < rows; x++ {
