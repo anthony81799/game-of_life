@@ -3,30 +3,17 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
-const (
-	vertexShaderSource = `
-		#version 400
+var (
+	vertexShaderSource, _ = os.ReadFile("vert.glsl")
 
-		in vec3 vp;
-		void main() {
-			gl_Position = vec4(vp, 1.0);
-		}
-	` + "\x00"
-
-	fragmentShaderSource = `
-		#version 400
-
-		out vec4 frag_colour;
-		void main() {
-			frag_colour = vec4(1, 1, 1, 1.0);
-		}
-	` + "\x00"
+	fragmentShaderSource, _ = os.ReadFile("frag.glsl")
 )
 
 // initGlfw initializes glfw and returns a Window to use.
@@ -57,12 +44,12 @@ func initOpenGL() uint32 {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Println("OpenGL version", version)
 
-	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
+	vertexShader, err := compileShader(string(vertexShaderSource), gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
 	}
 
-	fragmentShader, err := compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
+	fragmentShader, err := compileShader(string(fragmentShaderSource), gl.FRAGMENT_SHADER)
 	if err != nil {
 		panic(err)
 	}
