@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	vertexShaderSource, _ = os.ReadFile("vert.glsl")
+	vertexShaderSource, _ = os.ReadFile("vert.vert")
 
-	fragmentShaderSource, _ = os.ReadFile("frag.glsl")
+	fragmentShaderSource, _ = os.ReadFile("frag.frag")
 )
 
 // initGlfw initializes glfw and returns a Window to use.
