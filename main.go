@@ -229,6 +229,7 @@ func newCell(x, y int) *cell {
 }
 
 func (c *cell) draw() {
+	c.alive = c.aliveNext
 	if !c.alive {
 		return
 	}
@@ -237,9 +238,6 @@ func (c *cell) draw() {
 }
 
 func (c *cell) checkState(cells [][]*cell) {
-	c.alive = c.aliveNext
-	c.aliveNext = c.alive
-
 	liveCount := c.liveNeighbors(cells)
 	if c.alive {
 		if liveCount < 2 {
