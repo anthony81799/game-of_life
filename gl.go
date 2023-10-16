@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"unsafe"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -103,7 +102,9 @@ func makeVao(points []float32, color []float32) uint32 {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
 	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointer(1, 3, gl.FLOAT, false, 0, unsafe.Pointer(18*unsafe.Sizeof(float32(1.0))))
+
+	// use VertexAttribPointerWithOffset to resolve possible missuse of unsafe.Pointer.
+	gl.VertexAttribPointerWithOffset(1, 3, gl.FLOAT, false, 0, 18*4)
 
 	return vao
 }
