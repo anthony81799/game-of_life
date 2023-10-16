@@ -42,10 +42,21 @@ func main() {
 	cells := makeCells(seed, threshold)
 	for !window.ShouldClose() {
 		t := time.Now()
+		aliveCells := 0
+		changedCells := 0
 		for x := range cells {
 			for _, c := range cells[x] {
 				c.checkState(cells)
+				if c.alive {
+					aliveCells++
+				}
+				if c.stateChanged {
+					changedCells++
+				}
 			}
+		}
+		if aliveCells == 0 || changedCells == 0 {
+			glfw.GetCurrentContext().SetShouldClose(true)
 		}
 		draw(cells, window, program)
 		time.Sleep(time.Second/time.Duration(fps) - time.Since(t))

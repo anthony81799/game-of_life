@@ -28,15 +28,14 @@ type cell struct {
 	x int
 	y int
 
-	alive     bool
-	nextState bool
+	alive        bool
+	nextState    bool
+	stateChanged bool
 }
 
 // checkState determines the state of the cell for the next tick of the game.
 func (c *cell) checkState(cells [][]*cell) {
-	c.alive = c.nextState
-	c.nextState = c.alive
-
+	originalState := c.nextState
 	liveCount := c.liveNeighbors(cells)
 	if c.alive {
 		// 1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
@@ -59,6 +58,7 @@ func (c *cell) checkState(cells [][]*cell) {
 			c.nextState = true
 		}
 	}
+	c.stateChanged = originalState != c.nextState
 }
 
 // liveNeighbors returns the number of live neighbors for a cell.
@@ -106,7 +106,7 @@ func (c *cell) draw() {
 }
 
 // newCell initializes and returns a cell with the given x/y coordinates.
-func newCell(x, y int) *cell {
+func newCell(x, y int, color []float32) *cell {
 	points := make([]float32, len(squarePoints))
 	copy(points, squarePoints)
 
@@ -132,7 +132,7 @@ func newCell(x, y int) *cell {
 	}
 
 	return &cell{
-		drawable: makeVao(points),
+		drawable: makeVao(points, color),
 
 		x: x,
 		y: y,
@@ -146,7 +146,7 @@ func makeCells(seed int64, threshold float64) [][]*cell {
 	cells := make([][]*cell, rows)
 	for x := 0; x < rows; x++ {
 		for y := 0; y < columns; y++ {
-			c := newCell(x, y)
+			c := newCell(x, y, []float32{0.0, 1.0, 0.0})
 
 			c.alive = rand.Float64() < threshold
 			c.nextState = c.alive
