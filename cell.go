@@ -23,11 +23,9 @@ var (
 )
 
 type cell struct {
-	drawable uint32
-
-	x int
-	y int
-
+	x            int
+	y            int
+	color        []float32
 	alive        bool
 	nextState    bool
 	stateChanged bool
@@ -44,8 +42,13 @@ func (c *cell) checkState(cells [][]*cell) {
 		}
 
 		// 2. Any live cell with two or three live neighbours lives on to the next generation.
-		if liveCount == 2 || liveCount == 3 {
+		if liveCount == 2 {
 			c.nextState = true
+			c.color = []float32{1.0, 1.0, 0.0}
+		}
+		if liveCount == 3 {
+			c.nextState = true
+			c.color = []float32{1.0, 0.0, 0.0}
 		}
 
 		// 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
@@ -56,6 +59,7 @@ func (c *cell) checkState(cells [][]*cell) {
 		// 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 		if liveCount == 3 {
 			c.nextState = true
+			c.color = []float32{0.0, 1.0, 0.0}
 		}
 	}
 	c.stateChanged = originalState != c.nextState
@@ -101,12 +105,6 @@ func (c *cell) draw() {
 		return
 	}
 
-	gl.BindVertexArray(c.drawable)
-	gl.DrawArrays(gl.TRIANGLES, 0, squarePointCount)
-}
-
-// newCell initializes and returns a cell with the given x/y coordinates.
-func newCell(x, y int, color []float32) *cell {
 	points := make([]float32, len(squarePoints))
 	copy(points, squarePoints)
 
@@ -116,10 +114,10 @@ func newCell(x, y int, color []float32) *cell {
 		switch i % 3 {
 		case 0:
 			size = 1.0 / float32(columns)
-			factor = float32(x) * size
+			factor = float32(c.x) * size
 		case 1:
 			size = 1.0 / float32(rows)
-			factor = float32(y) * size
+			factor = float32(c.y) * size
 		default:
 			continue
 		}
@@ -131,9 +129,13 @@ func newCell(x, y int, color []float32) *cell {
 		}
 	}
 
-	return &cell{
-		drawable: makeVao(points, color),
+	gl.BindVertexArray(makeVao(points, c.color))
+	gl.DrawArrays(gl.TRIANGLES, 0, squarePointCount)
+}
 
+// newCell initializes and returns a cell with the given x/y coordinates.
+func newCell(x, y int) *cell {
+	return &cell{
 		x: x,
 		y: y,
 	}
@@ -146,7 +148,7 @@ func makeCells(seed int64, threshold float64) [][]*cell {
 	cells := make([][]*cell, rows)
 	for x := 0; x < rows; x++ {
 		for y := 0; y < columns; y++ {
-			c := newCell(x, y, []float32{0.0, 1.0, 0.0})
+			c := newCell(x, y)
 
 			c.alive = rand.Float64() < threshold
 			c.nextState = c.alive
