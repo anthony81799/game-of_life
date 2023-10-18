@@ -87,23 +87,29 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 
 // makeVao initializes and returns a vertex array from the points provided.
 func makeVao(points []float32, color []float32) uint32 {
+	// append color to the points slice
 	for i := 0; i < 6; i++ {
 		points = append(points, color...)
 	}
+
+	// generate and bind VERTEX BUFFER OBJECT
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 
+	// generate and bind VERTEXT ARRAY OBJECT
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
-	gl.EnableVertexAttribArray(0)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
-	gl.EnableVertexAttribArray(1)
 
+	// enable vertex attribute array for positions
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
+
+	// enable vertex attribute array for colors
 	// use VertexAttribPointerWithOffset to resolve possible missuse of unsafe.Pointer.
+	gl.EnableVertexAttribArray(1)
 	gl.VertexAttribPointerWithOffset(1, 3, gl.FLOAT, false, 0, 18*4)
 
 	return vao
